@@ -1,19 +1,36 @@
-const express = require("express")
-const { createBlog, getBlogs, getBlog, updateBlog, deleteBlog, getUserBlogs } = require("../controllers/blogs")
-const { protect, checkBlogOwnership } = require("../middleware/auth")
-const upload = require("../middleware/upload")
+const express = require("express");
+const router = express.Router();
 
-const router = express.Router()
+// IMPORT CONTROLLER
+const {
+  createBlog,
+  getBlogs,
+  getBlog,
+  updateBlog,
+  deleteBlog,
+  getUserBlogs,
+} = require("../controllers/blogs");
 
-router.route("/").get(getBlogs).post(protect, upload.single("image"), createBlog)
+// IMPORT AUTH MIDDLEWARE
+const { protect } = require("../middleware/auth");
 
-router.route("/user").get(protect, getUserBlogs)
+// IMPORT MULTER (image upload)
+const upload = require("../middleware/upload");
 
-router
-  .route("/:id")
-  .get(getBlog)
-  .put(protect, checkBlogOwnership, upload.single("image"), updateBlog)
-  .delete(protect, checkBlogOwnership, deleteBlog)
+// ------------------------
+// PUBLIC ROUTES
+// ------------------------
+router.get("/", getBlogs);      
 
-module.exports = router
+// ------------------------
+// PRIVATE ROUTES
+// ------------------------
+router.get("/user", protect, getUserBlogs); 
 
+router.post("/", protect, upload.single("image"), createBlog); 
+router.put("/:id", protect, updateBlog);
+router.delete("/:id", protect, deleteBlog);
+
+router.get("/:id", getBlog); 
+
+module.exports = router;
