@@ -1,7 +1,7 @@
-const express = require("express");
-const router = express.Router();
+const express = require("express")
+const router = express.Router()
 
-// IMPORT CONTROLLER
+// IMPORT CONTROLLERS
 const {
   createBlog,
   getBlogs,
@@ -9,28 +9,28 @@ const {
   updateBlog,
   deleteBlog,
   getUserBlogs,
-} = require("../controllers/blogs");
+} = require("../controllers/blogs")
 
 // IMPORT AUTH MIDDLEWARE
-const { protect } = require("../middleware/auth");
+const { protect, checkBlogOwnership } = require("../middleware/auth")
 
 // IMPORT MULTER (image upload)
-const upload = require("../middleware/upload");
+const upload = require("../middleware/upload")
 
-// ------------------------
 // PUBLIC ROUTES
-// ------------------------
-router.get("/", getBlogs);      
+router.get("/", getBlogs)
 
-// ------------------------
 // PRIVATE ROUTES
-// ------------------------
-router.get("/user", protect, getUserBlogs); 
+router.get("/user", protect, getUserBlogs)
 
-router.post("/", protect, upload.single("image"), createBlog); 
-router.put("/:id", protect, updateBlog);
-router.delete("/:id", protect, deleteBlog);
+// Create blog (private, with image upload)
+router.post("/", protect, upload.single("image"), createBlog)
 
-router.get("/:id", getBlog); 
+// Blog specific routes
+router
+  .route("/:id")
+  .get(getBlog)
+  .put(protect, checkBlogOwnership, upload.single("image"), updateBlog)
+  .delete(protect, checkBlogOwnership, deleteBlog)
 
-module.exports = router;
+module.exports = router
